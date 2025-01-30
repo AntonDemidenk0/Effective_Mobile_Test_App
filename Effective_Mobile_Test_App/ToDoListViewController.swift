@@ -51,10 +51,43 @@ final class ToDoListViewController: UIViewController {
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.dataSource = self
+        tableView.separatorColor = UIColor(named: "separatorColor")
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         tableView.register(TaskTableViewCell.self, forCellReuseIdentifier: TaskTableViewCell.identifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = .clear
         return tableView
+    }()
+    
+    private lazy var footerView: UIView = {
+        let footer = UIView()
+        footer.backgroundColor = UIColor(named: "gray")
+        
+        let taskCountLabel = UILabel()
+        taskCountLabel.translatesAutoresizingMaskIntoConstraints = false
+        taskCountLabel.textColor = UIColor(named: "white")
+        taskCountLabel.font = UIFont.systemFont(ofSize: 11)
+        taskCountLabel.tag = 101
+        footer.addSubview(taskCountLabel)
+        
+        let addButton = UIButton(type: .system)
+        addButton.setImage(UIImage (systemName: "square.and.pencil"), for: .normal)
+        addButton.tintColor = UIColor(named: "yellow") ?? .systemYellow
+        addButton.translatesAutoresizingMaskIntoConstraints = false
+        addButton.addTarget(self, action: #selector(createTaskButtonTapped), for: .touchUpInside)
+        footer.addSubview(addButton)
+        
+        NSLayoutConstraint.activate([
+            taskCountLabel.centerXAnchor.constraint(equalTo: footer.centerXAnchor),
+            taskCountLabel.topAnchor.constraint(equalTo: footer.topAnchor, constant: 20.5),
+            
+            addButton.centerYAnchor.constraint(equalTo: taskCountLabel.centerYAnchor),
+            addButton.heightAnchor.constraint(equalToConstant: 44),
+            addButton.widthAnchor.constraint(equalToConstant: 68),
+            addButton.trailingAnchor.constraint(equalTo: footer.trailingAnchor),
+        ])
+        footer.translatesAutoresizingMaskIntoConstraints = false
+        return footer
     }()
     
     override func viewDidLoad() {
@@ -68,6 +101,7 @@ final class ToDoListViewController: UIViewController {
         view.addSubview(titleLabel)
         view.addSubview(searchBar)
         view.addSubview(tableView)
+        view.addSubview(footerView)
         setupConstraints()
     }
     
@@ -86,7 +120,12 @@ final class ToDoListViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 16),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: footerView.topAnchor),
+            
+            footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                footerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                footerView.heightAnchor.constraint(equalToConstant: 83)
         ])
     }
     
@@ -94,7 +133,19 @@ final class ToDoListViewController: UIViewController {
         toDoService.fetchTasks { [weak self] fetchedTasks in
             self?.tasks = fetchedTasks
             self?.tableView.reloadData()
+            self?.updateTaskCountLabel()
         }
+    }
+    
+    private func updateTaskCountLabel() {
+        if let taskCountLabel = footerView.viewWithTag(101) as? UILabel {
+            taskCountLabel.text = "\(tasks.count) Задач"
+        }
+    }
+
+    @objc private func createTaskButtonTapped() {
+       // let createTaskVC = NewTaskViewController()
+       // present(createTaskVC, animated: true)
     }
 }
 
@@ -108,6 +159,7 @@ extension ToDoListViewController: UITableViewDataSource {
             return UITableViewCell()
         }
         cell.backgroundColor = .clear
+        cell.selectionStyle = .none
         let task = tasks[indexPath.row]
         cell.configure(with: task)
         return cell
