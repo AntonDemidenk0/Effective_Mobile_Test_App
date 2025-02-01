@@ -9,5 +9,5 @@ struct toDoTask {
     let title: String
     let description: String
     let creationDate: String
-    let isReady: Bool
+    var isReady: Bool
 }

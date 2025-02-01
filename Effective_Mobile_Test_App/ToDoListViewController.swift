@@ -51,6 +51,7 @@ final class ToDoListViewController: UIViewController {
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.dataSource = self
+        tableView.delegate = self
         tableView.separatorColor = UIColor(named: "separatorColor")
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         tableView.register(TaskTableViewCell.self, forCellReuseIdentifier: TaskTableViewCell.identifier)
@@ -81,7 +82,7 @@ final class ToDoListViewController: UIViewController {
             taskCountLabel.centerXAnchor.constraint(equalTo: footer.centerXAnchor),
             taskCountLabel.topAnchor.constraint(equalTo: footer.topAnchor, constant: 20.5),
             
-            addButton.centerYAnchor.constraint(equalTo: taskCountLabel.centerYAnchor),
+            addButton.topAnchor.constraint(equalTo: footer.topAnchor),
             addButton.heightAnchor.constraint(equalToConstant: 44),
             addButton.widthAnchor.constraint(equalToConstant: 68),
             addButton.trailingAnchor.constraint(equalTo: footer.trailingAnchor),
@@ -93,6 +94,7 @@ final class ToDoListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(named: "black")
+        navigationController?.setNavigationBarHidden(true, animated: false)
         setupViews()
         fetchTasks()
     }
@@ -144,14 +146,20 @@ final class ToDoListViewController: UIViewController {
     }
 
     @objc private func createTaskButtonTapped() {
-       // let createTaskVC = NewTaskViewController()
-       // present(createTaskVC, animated: true)
+        let newTaskVC = NewTaskViewController()
+        navigationController?.pushViewController(newTaskVC, animated: true)
     }
 }
 
-extension ToDoListViewController: UITableViewDataSource {
+extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tasks.count
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tasks[indexPath.row].isReady.toggle()
+        
+        tableView.reloadRows(at: [indexPath], with: .automatic)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

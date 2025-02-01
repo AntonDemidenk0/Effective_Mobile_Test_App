@@ -84,11 +84,15 @@ final class TaskTableViewCell: UITableViewCell {
         iconImageView.image = UIImage(named: iconName)?.withRenderingMode(.alwaysTemplate)
         iconImageView.tintColor = task.isReady ? .yellow : .gray
         
-        titleLabel.text = task.title
-        descriptionLabel.text = task.description
-        
         let textAlpha: CGFloat = task.isReady ? 0.5 : 1.0
-        titleLabel.alpha = textAlpha
+        
+        let attributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor.white.withAlphaComponent(textAlpha),
+            .strikethroughStyle: task.isReady ? NSUnderlineStyle.single.rawValue : 0
+        ]
+        
+        titleLabel.attributedText = NSAttributedString(string: task.title, attributes: attributes)
+        descriptionLabel.text = task.description
         descriptionLabel.alpha = textAlpha
         
         let dateFormatter = DateFormatter()
