@@ -6,15 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1F2310562D52B00000BE0C4D /* OHHTTPStubs in Frameworks */ = {isa = PBXBuildFile; productRef = 1F2310552D52B00000BE0C4D /* OHHTTPStubs */; };
+		1F2310582D52B00000BE0C4D /* OHHTTPStubsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1F2310572D52B00000BE0C4D /* OHHTTPStubsSwift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		1F79706F2D4A334D00535B80 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1F79704D2D4A334900535B80 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1F7970542D4A334900535B80;
-			remoteInfo = Effective_Mobile_Test_App;
-		};
-		1F7970792D4A334D00535B80 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1F79704D2D4A334900535B80 /* Project object */;
 			proxyType = 1;
@@ -26,7 +24,6 @@
 /* Begin PBXFileReference section */
 		1F7970552D4A334900535B80 /* Effective_Mobile_Test_App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Effective_Mobile_Test_App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F79706E2D4A334D00535B80 /* Effective_Mobile_Test_AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Effective_Mobile_Test_AppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1F7970782D4A334D00535B80 /* Effective_Mobile_Test_AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Effective_Mobile_Test_AppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -53,11 +50,6 @@
 			path = Effective_Mobile_Test_AppTests;
 			sourceTree = "<group>";
 		};
-		1F79707B2D4A334D00535B80 /* Effective_Mobile_Test_AppUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Effective_Mobile_Test_AppUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,13 +64,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		1F7970752D4A334D00535B80 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				1F2310562D52B00000BE0C4D /* OHHTTPStubs in Frameworks */,
+				1F2310582D52B00000BE0C4D /* OHHTTPStubsSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,7 +77,6 @@
 			children = (
 				1F7970572D4A334900535B80 /* Effective_Mobile_Test_App */,
 				1F7970712D4A334D00535B80 /* Effective_Mobile_Test_AppTests */,
-				1F79707B2D4A334D00535B80 /* Effective_Mobile_Test_AppUITests */,
 				1F7970562D4A334900535B80 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -100,7 +86,6 @@
 			children = (
 				1F7970552D4A334900535B80 /* Effective_Mobile_Test_App.app */,
 				1F79706E2D4A334D00535B80 /* Effective_Mobile_Test_AppTests.xctest */,
-				1F7970782D4A334D00535B80 /* Effective_Mobile_Test_AppUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -148,33 +133,12 @@
 			);
 			name = Effective_Mobile_Test_AppTests;
 			packageProductDependencies = (
+				1F2310552D52B00000BE0C4D /* OHHTTPStubs */,
+				1F2310572D52B00000BE0C4D /* OHHTTPStubsSwift */,
 			);
 			productName = Effective_Mobile_Test_AppTests;
 			productReference = 1F79706E2D4A334D00535B80 /* Effective_Mobile_Test_AppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		1F7970772D4A334D00535B80 /* Effective_Mobile_Test_AppUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 1F7970892D4A334D00535B80 /* Build configuration list for PBXNativeTarget "Effective_Mobile_Test_AppUITests" */;
-			buildPhases = (
-				1F7970742D4A334D00535B80 /* Sources */,
-				1F7970752D4A334D00535B80 /* Frameworks */,
-				1F7970762D4A334D00535B80 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				1F79707A2D4A334D00535B80 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				1F79707B2D4A334D00535B80 /* Effective_Mobile_Test_AppUITests */,
-			);
-			name = Effective_Mobile_Test_AppUITests;
-			packageProductDependencies = (
-			);
-			productName = Effective_Mobile_Test_AppUITests;
-			productReference = 1F7970782D4A334D00535B80 /* Effective_Mobile_Test_AppUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -193,10 +157,6 @@
 						CreatedOnToolsVersion = 16.0;
 						TestTargetID = 1F7970542D4A334900535B80;
 					};
-					1F7970772D4A334D00535B80 = {
-						CreatedOnToolsVersion = 16.0;
-						TestTargetID = 1F7970542D4A334900535B80;
-					};
 				};
 			};
 			buildConfigurationList = 1F7970502D4A334900535B80 /* Build configuration list for PBXProject "Effective_Mobile_Test_App" */;
@@ -208,6 +168,9 @@
 			);
 			mainGroup = 1F79704C2D4A334900535B80;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1F2310542D52AFE000BE0C4D /* XCRemoteSwiftPackageReference "OHHTTPStubs" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1F7970562D4A334900535B80 /* Products */;
 			projectDirPath = "";
@@ -215,7 +178,6 @@
 			targets = (
 				1F7970542D4A334900535B80 /* Effective_Mobile_Test_App */,
 				1F79706D2D4A334D00535B80 /* Effective_Mobile_Test_AppTests */,
-				1F7970772D4A334D00535B80 /* Effective_Mobile_Test_AppUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -229,13 +191,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		1F79706C2D4A334D00535B80 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		1F7970762D4A334D00535B80 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -259,13 +214,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		1F7970742D4A334D00535B80 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -273,11 +221,6 @@
 			isa = PBXTargetDependency;
 			target = 1F7970542D4A334900535B80 /* Effective_Mobile_Test_App */;
 			targetProxy = 1F79706F2D4A334D00535B80 /* PBXContainerItemProxy */;
-		};
-		1F79707A2D4A334D00535B80 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1F7970542D4A334900535B80 /* Effective_Mobile_Test_App */;
-			targetProxy = 1F7970792D4A334D00535B80 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -489,38 +432,6 @@
 			};
 			name = Release;
 		};
-		1F79708A2D4A334D00535B80 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "a.a.demidenko.Effective-Mobile-Test-AppUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Effective_Mobile_Test_App;
-			};
-			name = Debug;
-		};
-		1F79708B2D4A334D00535B80 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "a.a.demidenko.Effective-Mobile-Test-AppUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Effective_Mobile_Test_App;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -551,16 +462,31 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1F7970892D4A334D00535B80 /* Build configuration list for PBXNativeTarget "Effective_Mobile_Test_AppUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				1F79708A2D4A334D00535B80 /* Debug */,
-				1F79708B2D4A334D00535B80 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1F2310542D52AFE000BE0C4D /* XCRemoteSwiftPackageReference "OHHTTPStubs" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AliSoftware/OHHTTPStubs";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1F2310552D52B00000BE0C4D /* OHHTTPStubs */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F2310542D52AFE000BE0C4D /* XCRemoteSwiftPackageReference "OHHTTPStubs" */;
+			productName = OHHTTPStubs;
+		};
+		1F2310572D52B00000BE0C4D /* OHHTTPStubsSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F2310542D52AFE000BE0C4D /* XCRemoteSwiftPackageReference "OHHTTPStubs" */;
+			productName = OHHTTPStubsSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1F79704D2D4A334900535B80 /* Project object */;
 }
