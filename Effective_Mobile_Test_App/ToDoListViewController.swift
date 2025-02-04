@@ -379,17 +379,20 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
     private func deleteTask(at indexPath: IndexPath) {
         let taskToDelete = isSearching ? filteredTasks[indexPath.row] : tasks[indexPath.row]
         
-        if isSearching {
-            filteredTasks.remove(at: indexPath.row)
-            if let index = tasks.firstIndex(where: { $0.id == taskToDelete.id }) {
-                tasks.remove(at: index)
+        TaskStore.shared.deleteTask(task: taskToDelete) { success in
+            if success {
+                if self.isSearching {
+                    self.filteredTasks.remove(at: indexPath.row)
+                } else {
+                    self.tasks.remove(at: indexPath.row)
+                }
+                
+                DispatchQueue.main.async {
+                    self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                    self.updateTaskCountLabel()
+                }
             }
-        } else {
-            tasks.remove(at: indexPath.row)
         }
-        
-        tableView.deleteRows(at: [indexPath], with: .automatic)
-        updateTaskCountLabel()
     }
 }
 

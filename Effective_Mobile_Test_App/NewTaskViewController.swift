@@ -58,6 +58,9 @@ final class NewTaskViewController: UIViewController, UITextViewDelegate {
         descriptionTextView.delegate = self
         configureNavigationBar()
         populateFields()
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -65,6 +68,30 @@ final class NewTaskViewController: UIViewController, UITextViewDelegate {
         saveTask()
         navigationController?.setNavigationBarHidden(true, animated: true)
     }
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.text == "Введите описание задачи" {
+            textView.text = ""
+            textView.textColor = UIColor(named: "white")
+        }
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if textView.text.isEmpty {
+            textView.text = "Введите описание задачи"
+            textView.textColor = UIColor(named: "white")?.withAlphaComponent(0.5)
+        }
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            textField.resignFirstResponder()
+            return true
+        }
+        
+        func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
+            textView.resignFirstResponder()
+            return true
+        }
     
     private func setupViews() {
         view.addSubview(titleTextField)
@@ -118,17 +145,7 @@ final class NewTaskViewController: UIViewController, UITextViewDelegate {
         }
     }
     
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.text == "Введите описание задачи" {
-            textView.text = ""
-            textView.textColor = UIColor(named: "white")
+    @objc private func dismissKeyboard() {
+            view.endEditing(true)
         }
-    }
-    
-    func textViewDidEndEditing(_ textView: UITextView) {
-        if textView.text.isEmpty {
-            textView.text = "Введите описание задачи"
-            textView.textColor = UIColor(named: "white")?.withAlphaComponent(0.5)
-        }
-    }
 }

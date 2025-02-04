@@ -8,20 +8,25 @@
 import CoreData
 import UIKit
 
-final class TaskStore {
+class TaskStore {
     static let shared = TaskStore()
     
     private let context: NSManagedObjectContext
-
+    
     // MARK: - Initializer
     
-    private init() {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            fatalError("Unable to retrieve AppDelegate")
+    init(context: NSManagedObjectContext? = nil) {
+        if let context = context {
+            self.context = context
+        } else {
+            guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+                fatalError("Unable to retrieve AppDelegate")
+            }
+            self.context = appDelegate.persistentContainer.viewContext
         }
-        self.context = appDelegate.persistentContainer.viewContext
     }
-
+    
+    
     func saveContext(completion: @escaping (Bool) -> Void) {
         if context.hasChanges {
             context.perform {
@@ -37,7 +42,7 @@ final class TaskStore {
             completion(true)
         }
     }
-
+    
     func addTask(title: String, description: String, creationDate: String, isReady: Bool, completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: .background).async {
             let existingTasks = self.fetchTasksByTitle(title)
@@ -58,7 +63,7 @@ final class TaskStore {
             }
         }
     }
-
+    
     func fetchAllTasks(completion: @escaping ([Task]) -> Void) {
         DispatchQueue.global(qos: .background).async {
             let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
@@ -75,7 +80,7 @@ final class TaskStore {
             }
         }
     }
-
+    
     func fetchTasksByTitle(_ title: String) -> [Task] {
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "title == %@", title)
@@ -90,7 +95,7 @@ final class TaskStore {
         }
         return tasks
     }
-
+    
     func updateTask(task: Task, title: String, description: String, creationDate: String, isReady: Bool, completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: .background).async {
             self.context.perform {
@@ -104,7 +109,7 @@ final class TaskStore {
             }
         }
     }
-
+    
     func deleteTask(task: Task, completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: .background).async {
             self.context.perform {
@@ -115,4 +120,16 @@ final class TaskStore {
             }
         }
     }
+    
+    func reset() {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Task.fetchRequest()
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        
+        do {
+            try context.execute(deleteRequest)
+        } catch {
+            print("Ошибка при сбросе задач: \(error)")
+        }
+    }
 }
+
