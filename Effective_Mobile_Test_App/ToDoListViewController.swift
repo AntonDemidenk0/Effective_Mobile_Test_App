@@ -9,7 +9,11 @@ import UIKit
 
 final class ToDoListViewController: UIViewController {
     
-    private var tasks: [toDoTask] = []
+    private var tasks: [Task] = []
+    private var filteredTasks: [Task] = []
+    private var isSearching: Bool {
+        !searchBar.text!.isEmpty
+    }
     
     private let toDoService = ToDoService()
     
@@ -27,6 +31,7 @@ final class ToDoListViewController: UIViewController {
         searchBar.placeholder = "Search"
         searchBar.searchBarStyle = .minimal
         searchBar.translatesAutoresizingMaskIntoConstraints = false
+        searchBar.delegate = self
         
         if let textField = searchBar.value(forKey: "searchField") as? UITextField {
             textField.attributedPlaceholder = NSAttributedString(
@@ -96,7 +101,10 @@ final class ToDoListViewController: UIViewController {
         view.backgroundColor = UIColor(named: "black")
         navigationController?.setNavigationBarHidden(true, animated: false)
         setupViews()
-        fetchTasks()
+        loadData()
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
     }
     
     private func setupViews() {
@@ -125,17 +133,34 @@ final class ToDoListViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: footerView.topAnchor),
             
             footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                footerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-                footerView.heightAnchor.constraint(equalToConstant: 83)
+            footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            footerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            footerView.heightAnchor.constraint(equalToConstant: 83)
         ])
     }
     
-    private func fetchTasks() {
+    private func loadData() {
+        TaskStore.shared.fetchAllTasks { savedTasks in
+            if savedTasks.isEmpty {
+                self.fetchTasksFromAPI()
+            } else {
+                self.tasks = savedTasks
+                self.tableView.reloadData()
+                self.updateTaskCountLabel()
+            }
+        }
+    }
+    
+    private func fetchTasksFromAPI() {
         toDoService.fetchTasks { [weak self] fetchedTasks in
-            self?.tasks = fetchedTasks
-            self?.tableView.reloadData()
-            self?.updateTaskCountLabel()
+            guard let self = self else { return }
+            
+            self.tasks = fetchedTasks
+            
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+                self.updateTaskCountLabel()
+            }
         }
     }
     
@@ -144,36 +169,259 @@ final class ToDoListViewController: UIViewController {
             taskCountLabel.text = "\(tasks.count) Задач"
         }
     }
-
+    
+    private func saveNewTask(title: String, description: String) {
+        let creationDate = getCurrentDateString()
+        
+        TaskStore.shared.addTask(title: title, description: description, creationDate: creationDate, isReady: false) { success in
+            if success {
+                TaskStore.shared.fetchAllTasks { tasks in
+                    DispatchQueue.main.async {
+                        if let newTask = tasks.last {
+                            self.tasks.insert(newTask, at: 0)
+                        }
+                        self.tableView.reloadData()
+                        self.updateTaskCountLabel()
+                    }
+                }
+            } else {
+                print("Не удалось добавить задачу!")
+            }
+        }
+    }
+    
+    
+    private func updateTask(task: Task, newTitle: String, newDescription: String) {
+        let creationDate = task.creationDate ?? getCurrentDateString()
+        TaskStore.shared.updateTask(task: task, title: newTitle, description: newDescription, creationDate: creationDate, isReady: task.isReady) { success in
+            if success {
+                DispatchQueue.main.async {
+                    if let index = self.tasks.firstIndex(where: { $0.id == task.id }) {
+                        self.tasks[index] = task
+                        self.tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+                    }
+                }
+            } else {
+                print("Не удалось обновить задачу!")
+            }
+        }
+    }
+    
+    private func deleteTask(task: Task) {
+        TaskStore.shared.deleteTask(task: task) { success in
+            if success {
+                if let index = self.tasks.firstIndex(where: { $0.id == task.id }) {
+                    self.tasks.remove(at: index)
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                        self.updateTaskCountLabel()
+                    }
+                }
+            } else {
+                print("Не удалось удалить задачу!")
+            }
+        }
+    }
+    
+    private func getCurrentDateString() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd/MM/yyyy"
+        return dateFormatter.string(from: Date())
+    }
+    
     @objc private func createTaskButtonTapped() {
         let newTaskVC = NewTaskViewController()
+        
+        newTaskVC.onSave = { [weak self] title, description in
+            guard let self = self else { return }
+            self.saveNewTask(title: title, description: description)
+            self.tableView.reloadData()
+        }
+        
         navigationController?.pushViewController(newTaskVC, animated: true)
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
 }
 
 extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tasks.count
+        return isSearching ? filteredTasks.count : tasks.count
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tasks[indexPath.row].isReady.toggle()
-        
-        tableView.reloadRows(at: [indexPath], with: .automatic)
+        let selectedTask = isSearching ? filteredTasks[indexPath.row] : tasks[indexPath.row]
+        selectedTask.isReady.toggle()
+        TaskStore.shared.updateTask(task: selectedTask, title: selectedTask.title ?? "", description: selectedTask.taskDescription ?? "", creationDate: selectedTask.creationDate ?? "", isReady: selectedTask.isReady) { success in
+            if success {
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+            } else {
+                print("Не удалось обновить задачу!")
+            }
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TaskTableViewCell.identifier, for: indexPath) as? TaskTableViewCell else {
             return UITableViewCell()
         }
-        cell.backgroundColor = .clear
+        cell.backgroundColor = UIColor(named: "black")
         cell.selectionStyle = .none
-        let task = tasks[indexPath.row]
+        let task = isSearching ? filteredTasks[indexPath.row] : tasks[indexPath.row]
         cell.configure(with: task)
         return cell
     }
+    
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: {
+            let task = self.isSearching ? self.filteredTasks[indexPath.row] : self.tasks[indexPath.row]
+            
+            let previewCard = UIView()
+            previewCard.backgroundColor = UIColor(named: "gray")
+            previewCard.layer.cornerRadius = 12
+            previewCard.translatesAutoresizingMaskIntoConstraints = false
+            
+            let titleLabel = UILabel()
+            titleLabel.text = task.title
+            titleLabel.font = .systemFont(ofSize: 16, weight: .medium)
+            titleLabel.textColor = UIColor(named: "white")
+            titleLabel.numberOfLines = 2
+            titleLabel.translatesAutoresizingMaskIntoConstraints = false
+            previewCard.addSubview(titleLabel)
+            
+            let descriptionLabel = UILabel()
+            descriptionLabel.text = task.taskDescription
+            descriptionLabel.font = .systemFont(ofSize: 12)
+            descriptionLabel.textColor = UIColor(named: "white")
+            descriptionLabel.numberOfLines = 0
+            descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+            previewCard.addSubview(descriptionLabel)
+            
+            let dateLabel = UILabel()
+            dateLabel.text = task.creationDate
+            dateLabel.font = .systemFont(ofSize: 12)
+            dateLabel.textColor = UIColor(named: "white")
+            dateLabel.alpha = 0.5
+            dateLabel.translatesAutoresizingMaskIntoConstraints = false
+            previewCard.addSubview(dateLabel)
+            
+            let cardWidth = self.view.frame.width - 40
+            
+            NSLayoutConstraint.activate([
+                previewCard.widthAnchor.constraint(equalToConstant: cardWidth),
+                
+                titleLabel.topAnchor.constraint(equalTo: previewCard.topAnchor, constant: 12),
+                titleLabel.leadingAnchor.constraint(equalTo: previewCard.leadingAnchor, constant: 16),
+                titleLabel.trailingAnchor.constraint(equalTo: previewCard.trailingAnchor, constant: -16),
+                
+                descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
+                descriptionLabel.leadingAnchor.constraint(equalTo: previewCard.leadingAnchor, constant: 16),
+                descriptionLabel.trailingAnchor.constraint(equalTo: previewCard.trailingAnchor, constant: -16),
+                
+                dateLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 8),
+                dateLabel.leadingAnchor.constraint(equalTo: previewCard.leadingAnchor, constant: 16),
+                dateLabel.trailingAnchor.constraint(equalTo: previewCard.trailingAnchor, constant: -16),
+                dateLabel.bottomAnchor.constraint(equalTo: previewCard.bottomAnchor, constant: -12)
+            ])
+            
+            previewCard.layoutIfNeeded()
+            let targetSize = CGSize(width: cardWidth, height: UIView.layoutFittingCompressedSize.height)
+            let fittingSize = previewCard.systemLayoutSizeFitting(targetSize,
+                                                                  withHorizontalFittingPriority: .required,
+                                                                  verticalFittingPriority: .fittingSizeLevel)
+            
+            let previewViewController = UIViewController()
+            previewViewController.view = previewCard
+            previewViewController.preferredContentSize = fittingSize
+            
+            return previewViewController
+        }) { _ in
+            let editAction = UIAction(title: "Редактировать", image: UIImage(named: "edit")) { [weak self] _ in
+                self?.editTask(at: indexPath)
+            }
+            
+            let shareAction = UIAction(title: "Поделиться", image: UIImage(named: "export")) { [weak self] _ in
+                self?.shareTask(at: indexPath)
+            }
+            
+            let deleteAction = UIAction(title: "Удалить", image: UIImage(named: "trash"), attributes: .destructive) { [weak self] _ in
+                self?.deleteTask(at: indexPath)
+            }
+            
+            return UIMenu(title: "", children: [editAction, shareAction, deleteAction])
+        }
+    }
+    
+    
+    private func editTask(at indexPath: IndexPath) {
+        let task = isSearching ? filteredTasks[indexPath.row] : tasks[indexPath.row]
+        
+        let newTaskVC = NewTaskViewController()
+        newTaskVC.taskToEdit = task
+        
+        newTaskVC.onSave = { [weak self] title, description in
+            guard let self = self else { return }
+            self.updateTask(task: task, newTitle: title, newDescription: description)
+            self.tableView.reloadData()
+        }
+        
+        navigationController?.pushViewController(newTaskVC, animated: true)
+    }
+    
+    private func shareTask(at indexPath: IndexPath) {
+        let task = isSearching ? filteredTasks[indexPath.row] : tasks[indexPath.row]
+        let activityVC = UIActivityViewController(activityItems: [task.title ?? "Заголовок отсутствует"], applicationActivities: nil)
+        present(activityVC, animated: true, completion: nil)
+    }
+    
+    private func deleteTask(at indexPath: IndexPath) {
+        let taskToDelete = isSearching ? filteredTasks[indexPath.row] : tasks[indexPath.row]
+        
+        if isSearching {
+            filteredTasks.remove(at: indexPath.row)
+            if let index = tasks.firstIndex(where: { $0.id == taskToDelete.id }) {
+                tasks.remove(at: index)
+            }
+        } else {
+            tasks.remove(at: indexPath.row)
+        }
+        
+        tableView.deleteRows(at: [indexPath], with: .automatic)
+        updateTaskCountLabel()
+    }
 }
 
+extension ToDoListViewController: UISearchBarDelegate {
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            filteredTasks = tasks
+            tableView.reloadData()
+        } else {
+            searchTasks(with: searchText)
+        }
+    }
+    
+    func searchTasks(with searchText: String) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let filtered = self.tasks.filter { task in
+                guard let taskTitle = task.title else { return false }
+                return taskTitle.localizedCaseInsensitiveContains(searchText)
+            }
+            
+            DispatchQueue.main.async {
+                self.filteredTasks = filtered
+                self.tableView.reloadData()
+            }
+        }
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+    }
+}
 
 @available(iOS 17, *)
 #Preview {

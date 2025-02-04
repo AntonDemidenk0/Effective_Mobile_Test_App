@@ -20,14 +20,14 @@ final class TaskTableViewCell: UITableViewCell {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = UIColor(named: "white")
-        label.font = .systemFont(ofSize: 18, weight: .bold)
+        label.font = .systemFont(ofSize: 16, weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
     private let descriptionLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 14)
+        label.font = .systemFont(ofSize: 12)
         label.textColor = UIColor(named: "white")
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -79,7 +79,7 @@ final class TaskTableViewCell: UITableViewCell {
         ])
     }
     
-    func configure(with task: toDoTask) {
+    func configure(with task: Task) {
         let iconName = task.isReady ? "done" : "undone"
         iconImageView.image = UIImage(named: iconName)?.withRenderingMode(.alwaysTemplate)
         iconImageView.tintColor = task.isReady ? .yellow : .gray
@@ -91,13 +91,13 @@ final class TaskTableViewCell: UITableViewCell {
             .strikethroughStyle: task.isReady ? NSUnderlineStyle.single.rawValue : 0
         ]
         
-        titleLabel.attributedText = NSAttributedString(string: task.title, attributes: attributes)
-        descriptionLabel.text = task.description
+        titleLabel.attributedText = NSAttributedString(string: task.title ?? "No title", attributes: attributes)
+        descriptionLabel.text = task.taskDescription
         descriptionLabel.alpha = textAlpha
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd/MM/yyyy"
-        if let date = dateFormatter.date(from: task.creationDate) {
+        if let date = dateFormatter.date(from: task.creationDate ?? "Date()") {
             creationDateLabel.text = dateFormatter.string(from: date)
         } else {
             creationDateLabel.text = task.creationDate

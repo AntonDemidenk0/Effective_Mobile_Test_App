@@ -8,7 +8,10 @@
 import UIKit
 
 final class NewTaskViewController: UIViewController, UITextViewDelegate {
-
+    
+    var onSave: ((String, String) -> Void)?
+    var taskToEdit: Task?
+    
     private lazy var titleTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите заголовок"
@@ -18,7 +21,7 @@ final class NewTaskViewController: UIViewController, UITextViewDelegate {
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
-
+    
     private lazy var dateLabel: UILabel = {
         let label = UILabel()
         label.textColor = UIColor(named: "white")?.withAlphaComponent(0.5)
@@ -34,7 +37,7 @@ final class NewTaskViewController: UIViewController, UITextViewDelegate {
         
         return label
     }()
-
+    
     private lazy var descriptionTextView: UITextView = {
         let textView = UITextView()
         textView.font = UIFont.systemFont(ofSize: 17)
@@ -54,6 +57,7 @@ final class NewTaskViewController: UIViewController, UITextViewDelegate {
         setupConstraints()
         descriptionTextView.delegate = self
         configureNavigationBar()
+        populateFields()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -61,7 +65,7 @@ final class NewTaskViewController: UIViewController, UITextViewDelegate {
         saveTask()
         navigationController?.setNavigationBarHidden(true, animated: true)
     }
-
+    
     private func setupViews() {
         view.addSubview(titleTextField)
         view.addSubview(dateLabel)
@@ -94,12 +98,24 @@ final class NewTaskViewController: UIViewController, UITextViewDelegate {
     }
     
     private func saveTask() {
-        guard let title = titleTextField.text, !title.isEmpty else {
-            return
-        }
+        guard let title = titleTextField.text, !title.isEmpty else { return }
         
         let description = descriptionTextView.text == "Введите описание задачи" ? "" : descriptionTextView.text
-        print("Task saved: Title - \(title), Description - \(description)")
+        onSave?(title, description ?? "")
+    }
+    
+    private func populateFields() {
+        guard let task = taskToEdit else { return }
+        
+        titleTextField.text = task.title
+        
+        if let description = task.taskDescription, !description.isEmpty {
+            descriptionTextView.text = description
+            descriptionTextView.textColor = UIColor(named: "white")
+        } else {
+            descriptionTextView.text = "Введите описание задачи"
+            descriptionTextView.textColor = UIColor(named: "white")?.withAlphaComponent(0.5)
+        }
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {
@@ -108,7 +124,7 @@ final class NewTaskViewController: UIViewController, UITextViewDelegate {
             textView.textColor = UIColor(named: "white")
         }
     }
-
+    
     func textViewDidEndEditing(_ textView: UITextView) {
         if textView.text.isEmpty {
             textView.text = "Введите описание задачи"
